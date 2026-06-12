@@ -1,0 +1,1180 @@
+
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLTB Anti-Fraud Portal</title>
+    
+    <!-- Google Fonts: Poppins & Noto Sans Sinhala -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Identity Services Library for Login -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        :root {
+            --primary-color: #ffcc00; 
+            --dark-color: #131419;
+            --light-color: #f8f9fa;
+            --text-dark: #222;
+            --text-light: #fff;
+            --card-bg: #ffffff;
+            --whatsapp-green: #128c7e;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Noto Sans Sinhala', sans-serif;
+        }
+
+        body {
+            background-color: #a4b0be;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 430px; 
+            height: 100vh;
+            max-height: 850px;
+            background-color: var(--light-color);
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border-radius: 25px;
+        }
+
+        @media (max-width: 430px) {
+            .app-container {
+                border-radius: 0;
+                max-height: 100vh;
+            }
+        }
+
+        /* Screens Setup */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            background: var(--light-color);
+            z-index: 1;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        /* Loader Overlay */
+        .loader-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(19, 20, 25, 0.95);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            transition: opacity 0.3s ease;
+        }
+        .loader-overlay.hidden {
+            display: none;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,204,0,0.2);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Auth Screen */
+        .auth-screen {
+            padding: 40px 25px;
+            justify-content: center;
+            background: linear-gradient(135deg, #131419 0%, #2c3e50 100%);
+            color: var(--text-light);
+            overflow-y: auto;
+        }
+
+        .brand-logo {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .brand-logo i {
+            font-size: 4rem;
+            color: var(--primary-color);
+            text-shadow: 0 4px 10px rgba(255,204,0,0.3);
+        }
+
+        .brand-logo h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 12px;
+            color: var(--dark-color);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,204,0,0.4);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            color: #bdc3c7;
+            font-size: 0.85rem;
+        }
+
+        .google-btn-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .auth-toggle span {
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* App Main UI */
+        .app-header {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 22px;
+            text-align: center;
+            border-bottom: 2px solid #2c2d35;
+        }
+
+        .app-header h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 85px;
+            background: #f1f2f6;
+        }
+
+        /* WhatsApp Style Chat Layout (Home) */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: #e5ddd5; 
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-bubble {
+            background: white;
+            padding: 10px 14px;
+            border-radius: 0px 15px 15px 15px;
+            max-width: 85%;
+            align-self: flex-start;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+            position: relative;
+        }
+
+        .chat-bubble.own {
+            background: #dcf8c6;
+            border-radius: 15px 0px 15px 15px;
+            align-self: flex-end;
+        }
+
+        .chat-user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #ccc;
+        }
+
+        .chat-username {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #128c7e;
+        }
+
+        /* Bold text implementation */
+        .chat-text {
+            font-size: 0.95rem;
+            color: #111;
+            font-weight: 700; 
+            word-break: break-word;
+        }
+
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-top: 5px;
+            display: block;
+            font-weight: bold;
+        }
+
+        .chat-input-area {
+            background: #f0f0f0;
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .chat-btn-round {
+            width: 45px;
+            height: 45px;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+        .chat-send-btn { background: var(--whatsapp-green); }
+        .chat-mic-btn { background: #34495e; }
+        .chat-mic-btn.recording { background: #e74c3c; animation: pulse 1s infinite; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Modernized Beautiful Account Page Layout */
+        .account-premium-container {
+            padding: 25px 20px;
+            background: linear-gradient(180deg, #1e272e 0%, #2f3640 100%);
+            min-height: 100%;
+            color: white;
+        }
+
+        .profile-card-premium {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 25px 15px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+
+        .profile-media-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            background: #4b6584;
+            overflow: hidden;
+            border: 4px solid var(--primary-color);
+        }
+
+        .profile-media-container img, .profile-media-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            background: var(--primary-color);
+            color: var(--dark-color);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 5px;
+            box-shadow: 0 4px 10px rgba(255,204,0,0.2);
+            transition: var(--transition);
+        }
+        .file-upload-label:hover { transform: scale(1.05); }
+
+        .premium-input-group {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .premium-input-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .premium-input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            padding-top: 5px;
+        }
+
+        .meta-info-box {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.8rem;
+            color: #dcdde1;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Bottom Nav Bar */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 75px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.08);
+            border-top: 1px solid #edf2f7;
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+            height: 100%;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            margin-bottom: 3px;
+        }
+
+        .nav-item span {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .nav-item.active {
+            color: #ff9f43;
+            transform: translateY(-4px);
+        }
+
+        /* Modern Cards for other pages */
+        .modern-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 22px;
+            margin: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .modern-card h4 { font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+        .complaint-form input, .complaint-form textarea, .complaint-form select {
+            width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 10px;
+        }
+
+        /* Toast system */
+        .toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background-color: var(--dark-color);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: var(--transition);
+            opacity: 0;
+            text-align: center;
+            width: 85%;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Modal */
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1001; display: flex; justify-content: center; align-items: center; }
+        .modal.hidden { display: none; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 80%; }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast">Message here</div>
+
+    <!-- User Profile Viewer Modal -->
+    <div id="profileModal" class="modal hidden" onclick="closeProfileModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="modalMediaContainer" class="profile-media-container" style="border: 4px solid var(--whatsapp-green)"></div>
+            <h3 id="modalName" style="margin-bottom:5px; font-weight:700;">Name</h3>
+            <p id="modalEmail" style="color:#666; font-size:0.9rem; font-weight:600;">Email</p>
+            <button class="btn-primary" style="margin-top:15px; padding:10px;" onclick="closeProfileModal()">Close / වසන්න</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Loading Overlay Panel -->
+        <div id="loaderOverlay" class="loader-overlay hidden">
+            <div class="spinner"></div>
+            <h4 id="loaderText" style="font-weight:700; color:var(--primary-color);">Processing...</h4>
+        </div>
+
+        <!-- ================= SCREEN 1: LOGIN ================= -->
+        <div id="loginScreen" class="screen auth-screen active">
+            <div class="brand-logo">
+                <i class="fa-solid fa-bus-simple"></i>
+                <h2>SLTB ANTI-FRAUD</h2>
+                <p style="color:#cbd5e1; margin-top:5px; font-weight:700;">සුරක්ෂිත පොදු ප්‍රවාහනයක් වෙනුවෙන්</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Gmail Address / ජීමේල් ලිපිනය</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="loginEmail" placeholder="example@gmail.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password / මුරපදය</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Log In / ඇතුල් වන්න</button>
+            </form>
+
+            <div class="divider">OR / හෝ</div>
+
+            <div class="google-btn-wrapper">
+                <div id="g_id_onload"
+                     data-client_id="370188136983-6sd0sbeckeiitapouhpplj1oa6ck9kj0.apps.googleusercontent.com"
+                     data-callback="handleCredentialResponse">
+                </div>
+                <div class="g_id_signin" data-type="standard"></div>
+            </div>
+
+            <div class="auth-toggle">
+                Don't have an account? <span onclick="switchAuth('signupScreen')">Sign Up</span>
+            </div>
+        </div>
+
+        <!-- ================= SCREEN 2: SIGN UP ================= -->
+        <div id="signupScreen" class="screen auth-screen hidden">
+            <div class="brand-logo">
+                <i class="fa-solid fa-user-plus"></i>
+                <h2>Create Account</h2>
+                <p style="color:#cbd5e1; margin-top:5px; font-weight:700;">වංචාවෙන් තොර ලංකාවක් සඳහා</p>
+            </div>
+
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Full Name / සම්පූර්ණ නම</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="signupName" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Gmail Address / ජීමේල් ලිපිනය</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="signupEmail" placeholder="example@gmail.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password / මුරපදය</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="signupPassword" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password / මුරපදය තහවුරු කරන්න</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <input type="password" id="signupConfirmPassword" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sign Up / ගිණුම සාදන්න</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="auth-toggle">
+                Already have an account? <span onclick="switchAuth('loginScreen')">Log In</span>
+            </div>
+        </div>
+
+        <!-- ================= SCREEN 3: MAIN APPLICATION ================= -->
+        <div id="mainAppScreen" class="screen hidden">
+            <div class="app-header">
+                <h3 id="appHeaderTitle">Home</h3>
+            </div>
+
+            <div class="app-content" id="appContent">
+                <!-- Content injected via JS -->
+            </div>
+
+            <!-- Horizontal Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item active" onclick="switchTab('home', this)">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Home</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('contact', this)">
+                    <i class="fa-solid fa-address-book"></i>
+                    <span>Contact De</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('complaint', this)">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Complain CTB</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('account', this)">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Account</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        let isLoggedIn = false;
+        let currentUserEmail = ""; 
+        
+        // Setup central LocalStorage Database to persist users and public chats perfectly
+        if (!localStorage.getItem('usersDB')) {
+            localStorage.setItem('usersDB', JSON.stringify({}));
+        }
+        if (!localStorage.getItem('globalChatDB')) {
+            localStorage.setItem('globalChatDB', JSON.stringify([])); // Empty default (no mock examples)
+        }
+
+        function getUsersDB() { return JSON.parse(localStorage.getItem('usersDB')); }
+        function saveUsersDB(db) { localStorage.setItem('usersDB', JSON.stringify(db)); }
+        function getChatDB() { return JSON.parse(localStorage.getItem('globalChatDB')); }
+        function saveChatDB(db) { localStorage.setItem('globalChatDB', JSON.stringify(db)); }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function triggerLoader(text, callback) {
+            const loader = document.getElementById('loaderOverlay');
+            document.getElementById('loaderText').innerText = text;
+            loader.classList.remove('hidden');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                callback();
+            }, 4000);
+        }
+
+        function switchAuth(screenId) {
+            document.getElementById('loginScreen').className = 'screen auth-screen hidden';
+            document.getElementById('signupScreen').className = 'screen auth-screen hidden';
+            document.getElementById(screenId).className = 'screen auth-screen active';
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value.toLowerCase().trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+            const db = getUsersDB();
+            if (db[email]) {
+                showToast("මෙම ජීමේල් ලිපිනයෙන් දැනටමත් ගිණුමක් සාදා ඇත! (Email already exists)");
+                return;
+            }
+            if (password !== confirmPassword) {
+                showToast("Passwords ද්විත්වය නොගැලපේ! (Passwords do not match)");
+                return;
+            }
+
+            triggerLoader("Creating Account... / ගිණුම සකසමින් පවතී...", () => {
+                db[email] = {
+                    name: name,
+                    email: email,
+                    password: password,
+                    mediaType: "none",
+                    mediaSrc: "",
+                    loginTime: ""
+                };
+                saveUsersDB(db);
+                showToast("ගිණුම සාර්ථකව නිර්මාණය විය! කරුණාකර ලොග් වන්න. (Sign Up Success!)");
+                switchAuth('loginScreen');
+            });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.toLowerCase().trim();
+            const pass = document.getElementById('loginPassword').value;
+
+            const db = getUsersDB();
+            // Critical Validation: Must be signed up first!
+            if (!db[email] || db[email].password !== pass) {
+                showToast("ඇතුලත් කල දත්ත වැරදියි හෝ ඔබ තවම Sign Up වී නැත! (Please Sign Up first)");
+                return;
+            }
+
+            triggerLoader("Authenticating... / පද්ධතියට ඇතුල් වෙමින් පවතී...", () => {
+                isLoggedIn = true;
+                currentUserEmail = email;
+                db[email].loginTime = new Date().toLocaleString();
+                saveUsersDB(db);
+                enterMainApp();
+            });
+        }
+
+        function handleCredentialResponse(response) {
+            triggerLoader("Google Sign-In Processing...", () => {
+                let email = "googleuser@gmail.com";
+                let name = "Google User";
+                try {
+                    const base64Url = response.credential.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                    const googleUser = JSON.parse(jsonPayload);
+                    email = googleUser.email.toLowerCase().trim();
+                    name = googleUser.name;
+                } catch (e) {}
+
+                const db = getUsersDB();
+                if (!db[email]) {
+                    db[email] = { name: name, email: email, password: "OAuthProtected", mediaType: "none", mediaSrc: "", loginTime: "" };
+                }
+                isLoggedIn = true;
+                currentUserEmail = email;
+                db[email].loginTime = new Date().toLocaleString();
+                saveUsersDB(db);
+                showToast("Google හරහා සාර්ථකව ලොග් විය!");
+                enterMainApp();
+            });
+        }
+
+        function enterMainApp() {
+            if (!isLoggedIn) return;
+            document.getElementById('loginScreen').className = 'screen hidden';
+            document.getElementById('signupScreen').className = 'screen hidden';
+            document.getElementById('mainAppScreen').className = 'screen active';
+            switchTab('home', document.querySelector('.nav-item'));
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            currentUserEmail = "";
+            document.getElementById('mainAppScreen').className = 'screen hidden';
+            switchAuth('loginScreen');
+            showToast("ඔබ සාර්ථකව Logout විය!");
+        }
+
+        function handleMediaUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type.startsWith('video/')) {
+                const videoEl = document.createElement('video');
+                videoEl.preload = 'metadata';
+                videoEl.onloadedmetadata = function() {
+                    window.URL.revokeObjectURL(videoEl.src);
+                    if (videoEl.duration > 10.5) {
+                        showToast("වීඩියෝව උපරිම තත්පර 10ක් විය යුතුය! (Max 10 seconds only)");
+                        event.target.value = "";
+                    } else {
+                        saveMediaSrc(file, "video");
+                    }
+                };
+                videoEl.src = URL.createObjectURL(file);
+            } else if (file.type.startsWith('image/')) {
+                saveMediaSrc(file, "image");
+            } else {
+                showToast("වලංගු පින්තූරයක් හෝ වීඩියෝවක් තෝරන්න!");
+            }
+        }
+
+        function saveMediaSrc(file, type) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const db = getUsersDB();
+                db[currentUserEmail].temporarySrc = e.target.result;
+                db[currentUserEmail].temporaryType = type;
+                saveUsersDB(db);
+                
+                const container = document.getElementById('profilePreviewContainer');
+                if(type === 'image') {
+                    container.innerHTML = `<img src="${e.target.result}">`;
+                } else {
+                    container.innerHTML = `<video src="${e.target.result}" autoplay loop muted></video>`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveAccountSettings(e) {
+            e.preventDefault();
+            const db = getUsersDB();
+            const user = db[currentUserEmail];
+            user.name = document.getElementById('accName').value;
+            user.password = document.getElementById('accPass').value;
+            
+            if(user.temporarySrc) {
+                user.mediaSrc = user.temporarySrc;
+                user.mediaType = user.temporaryType;
+                delete user.temporarySrc;
+                delete user.temporaryType;
+            }
+            
+            db[currentUserEmail] = user;
+            saveUsersDB(db);
+            showToast("තොරතුරු සාර්ථකව සුරකින ලදී! (Saved Data)");
+            switchTab('account', document.querySelectorAll('.nav-item')[3]);
+        }
+
+        // Voice Message Simulation Features
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        function toggleVoiceRecord() {
+            const micBtn = document.getElementById('micBtn');
+            if (!isRecording) {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    // Simulation if browser permission is blocked or unsupported
+                    startVoiceSimulation();
+                    return;
+                }
+                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        const reader = new FileReader();
+                        reader.onloadend = () => sendVoiceMessage(reader.result);
+                        reader.readAsDataURL(audioBlob);
+                    };
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                    showToast("Recording Voice... / රෙකෝඩ් වෙමින් පවතී...");
+                }).catch(() => startVoiceSimulation());
+            } else {
+                if(mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                } else {
+                    stopVoiceSimulation();
+                }
+                isRecording = false;
+                micBtn.classList.remove('recording');
+            }
+        }
+
+        function startVoiceSimulation() {
+            isRecording = true;
+            document.getElementById('micBtn').classList.add('recording');
+            showToast("Voice Simulation Active (රෙකෝඩ් වෙමින් පවතී)...");
+        }
+        function stopVoiceSimulation() {
+            // Simulated fallback audio
+            sendVoiceMessage("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+        }
+
+        function sendVoiceMessage(audioSrc) {
+            const db = getUsersDB();
+            const user = db[currentUserEmail];
+            const chatList = getChatDB();
+
+            const newMsg = {
+                id: Date.now(),
+                email: currentUserEmail,
+                name: user.name,
+                text: "", 
+                isVoice: true,
+                audioSrc: audioSrc,
+                time: new Date()
+            };
+            chatList.push(newMsg);
+            saveChatDB(chatList);
+            renderChatMessages();
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chatMessagesBox');
+            if(!container) return;
+            
+            const chatList = getChatDB();
+            const db = getUsersDB();
+            container.innerHTML = '';
+
+            if (chatList.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:#7f8c8d; margin-top:50px; font-weight:700;">No messages yet. Start chatting!<br>පණිවිඩ කිසිවක් නැත. චැට් එක ආරම්භ කරන්න!</div>`;
+                return;
+            }
+
+            chatList.forEach(msg => {
+                const isOwn = msg.email === currentUserEmail;
+                const bubble = document.createElement('div');
+                bubble.className = `chat-bubble ${isOwn ? 'own' : ''}`;
+                
+                let mediaTag = `<i class="fa-solid fa-circle-user" style="font-size:32px; color:#aaa;"></i>`;
+                const sender = db[msg.email];
+                if(sender && sender.mediaSrc) {
+                    mediaTag = sender.mediaType === 'image' 
+                        ? `<img class="chat-avatar" src="${sender.mediaSrc}">` 
+                        : `<video class="chat-avatar" src="${sender.mediaSrc}" autoplay loop muted></video>`;
+                }
+
+                let deleteBtnHtml = '';
+                if(isOwn) {
+                    const timeDiff = (new Date() - new Date(msg.time)) / 1000;
+                    if(timeDiff < 10) {
+                        deleteBtnHtml = `<button class="delete-btn" onclick="deleteMessage(${msg.id})"><i class="fa-solid fa-trash"></i> Delete (තත්. 10 ඇතුලත)</button>`;
+                    }
+                }
+
+                let contentHtml = `<div class="chat-text">${msg.text}</div>`;
+                if(msg.isVoice) {
+                    contentHtml = `
+                        <div class="audio-player">
+                            <i class="fa-solid fa-play" style="color:var(--whatsapp-green); cursor:pointer;" onclick="new Audio('${msg.audioSrc}').play()"></i>
+                            <span style="font-size:0.8rem; font-weight:700; color:#555;">Voice Message (බෝල්ඩ් හඬ පණිවිඩය)</span>
+                        </div>
+                    `;
+                }
+
+                bubble.innerHTML = `
+                    <div class="chat-user-info" onclick="viewUserProfile('${msg.email}', '${msg.name}')">
+                        ${mediaTag}
+                        <span class="chat-username">${msg.name}</span>
+                    </div>
+                    ${contentHtml}
+                    ${deleteBtnHtml}
+                `;
+                container.appendChild(bubble);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            if(!input || input.value.trim() === '') return;
+
+            const db = getUsersDB();
+            const user = db[currentUserEmail];
+            const chatList = getChatDB();
+
+            const newMsg = {
+                id: Date.now(),
+                email: currentUserEmail,
+                name: user.name,
+                text: input.value.trim(),
+                isVoice: false,
+                time: new Date()
+            };
+
+            chatList.push(newMsg);
+            saveChatDB(chatList);
+            input.value = '';
+            renderChatMessages();
+
+            setTimeout(() => { renderChatMessages(); }, 10500);
+        }
+
+        function deleteMessage(id) {
+            let chatList = getChatDB();
+            chatList = chatList.filter(m => m.id !== id);
+            saveChatDB(chatList);
+            showToast("පණිවිඩය මකා දමන ලදී (Message Deleted)");
+            renderChatMessages();
+        }
+
+        function viewUserProfile(email, name) {
+            const modal = document.getElementById('profileModal');
+            const mediaContainer = document.getElementById('modalMediaContainer');
+            document.getElementById('modalName').innerText = name;
+            document.getElementById('modalEmail').innerText = email;
+
+            let mediaHtml = `<i class="fa-solid fa-user" style="font-size:5rem; color:#ccc; display:block; padding:20px;"></i>`;
+            const db = getUsersDB();
+            const targetUser = db[email];
+
+            if(targetUser && targetUser.mediaSrc) {
+                mediaHtml = targetUser.mediaType === 'image' 
+                    ? `<img src="${targetUser.mediaSrc}">` 
+                    : `<video src="${targetUser.mediaSrc}" autoplay loop controls muted></video>`;
+            }
+
+            mediaContainer.innerHTML = mediaHtml;
+            modal.classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        // Screen Content Provider Map
+        const tabTemplates = {
+            home: () => `
+                <div class="chat-container">
+                    <div style="background:#075e54; color:white; padding:10px; font-size:0.85rem; text-align:center; font-weight:bold;">
+                        Anti-Fraud Live Community Group / වංචා විරෝධී සජීවී සමූහය
+                    </div>
+                    <div class="chat-messages" id="chatMessagesBox"></div>
+                    <div class="chat-input-area">
+                        <button id="micBtn" class="chat-btn-round chat-mic-btn" onclick="toggleVoiceRecord()"><i class="fa-solid fa-microphone"></i></button>
+                        <input type="text" id="chatInput" placeholder="Type a message / පණිවිඩයක් ලියන්න..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button class="chat-btn-round chat-send-btn" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            `,
+            contact: () => `
+                <div class="modern-card">
+                    <h4><i class="fa-solid fa-headset" style="color:#3498db"></i> SLTB Head Office / ප්‍රධාන කාර්යාලය</h4>
+                    <p style="font-size:0.9rem; margin-top:5px; line-height:1.5;"><b>Hotline:</b> 1955<br><b>Phone:</b> 0112 581 123<br><b>Address:</b> Sri Lanka Transport Board, Colombo 05.</p>
+                </div>
+            `,
+            complaint: () => `
+                <div class="modern-card">
+                    <h4><i class="fa-solid fa-pen-to-square" style="color:#e74c3c"></i> Submit Complaint / පැමිණිල්ලක්</h4>
+                    <form class="complaint-form" onsubmit="event.preventDefault(); showToast('පැමිණිල්ල ඉදිරිපත් කළා!'); this.reset();">
+                        <label>Bus Number / බස් රථ අංකය:</label>
+                        <input type="text" placeholder="WP ND-4567" required>
+                        <label>Issue / සිදුවීම:</label>
+                        <select><option>Not issuing tickets / ටිකට්පත් වංචා</option></select>
+                        <button type="submit" class="btn-primary" style="background:#e74c3c; color:white;">Submit</button>
+                    </form>
+                </div>
+            `,
+            account: () => {
+                const db = getUsersDB();
+                const user = db[currentUserEmail];
+                return `
+                <div class="account-premium-container">
+                    <form onsubmit="saveAccountSettings(event)">
+                        <div class="profile-card-premium">
+                            <div class="profile-media-container" id="profilePreviewContainer">
+                                ${(!user.mediaSrc) 
+                                    ? `<i class="fa-solid fa-user-astronaut" style="font-size:110px; color:#fff; padding:5px;"></i>`
+                                    : (user.mediaType === 'image' 
+                                        ? `<img src="${user.mediaSrc}">` 
+                                        : `<video src="${user.mediaSrc}" autoplay loop muted></video>`)
+                                }
+                            </div>
+                            <label class="file-upload-label">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo / Video
+                                <input type="file" accept="image/*,video/*" style="display:none;" onchange="handleMediaUpload(event)">
+                            </label>
+                            <h3 style="margin-top:10px; font-weight:700;">${user.name}</h3>
+                        </div>
+
+                        <div class="premium-input-group">
+                            <label>Full Name / සම්පූර්ණ නම</label>
+                            <input type="text" id="accName" value="${user.name}" required>
+                        </div>
+
+                        <div class="premium-input-group" style="opacity: 0.7;">
+                            <label>Email Address / ජීමේල් ලිපිනය</label>
+                            <input type="text" value="${user.email}" readonly>
+                        </div>
+
+                        <div class="premium-input-group">
+                            <label>Change Password / නව මුරපදය</label>
+                            <input type="password" id="accPass" value="${user.password}" required>
+                        </div>
+
+                        <div class="meta-info-box">
+                            <i class="fa-solid fa-clock-rotate-left"></i> <b>Last Login Time:</b> ${user.loginTime || 'Just now'}
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="margin-bottom:12px; box-shadow:0 4px 15px rgba(255,204,0,0.4);">Save Profile / යාවත්කාලීන කරන්න</button>
+                        <button type="button" onclick="logout()" class="btn-primary" style="background:#e74c3c; color:white;">Log Out / පද්ධතියෙන් ඉවත් වන්න</button>
+                    </form>
+                </div>
+            `;}
+        };
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+
+            const titleMap = {
+                home: "Live Community Group / සජීවී සමූහය",
+                contact: "Contact De / සම්බන්ධතා",
+                complaint: "Complain CTB / පැමිණිලි පිටුව",
+                account: "Account Profile / ගිණුම් සැකසුම්"
+            };
+            document.getElementById('appHeaderTitle').innerText = titleMap[tabId];
+
+            const contentArea = document.getElementById('appContent');
+            contentArea.innerHTML = tabTemplates[tabId]();
+
+            if(tabId === 'home') {
+                renderChatMessages();
+            }
+        }
+    </script>
+</body>
+</html>
+
