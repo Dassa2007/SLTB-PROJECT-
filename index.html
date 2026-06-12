@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="si">
 <head>
@@ -6,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SLTB Anti-Fraud Portal</title>
     
-    <!-- Google Fonts: Poppins & Noto Sans Sinhala -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Identity Services Library for Login -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
@@ -555,7 +551,6 @@
 
     <div id="toast" class="toast">Message here</div>
 
-    <!-- User Profile Viewer Modal -->
     <div id="profileModal" class="modal hidden" onclick="closeProfileModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div id="modalMediaContainer" class="profile-media-container" style="border: 4px solid var(--whatsapp-green)"></div>
@@ -567,13 +562,11 @@
 
     <div class="app-container">
 
-        <!-- Loading Overlay Panel -->
         <div id="loaderOverlay" class="loader-overlay hidden">
             <div class="spinner"></div>
             <h4 id="loaderText" style="font-weight:700; color:var(--primary-color);">Processing...</h4>
         </div>
 
-        <!-- ================= SCREEN 1: LOGIN ================= -->
         <div id="loginScreen" class="screen auth-screen active">
             <div class="brand-logo">
                 <i class="fa-solid fa-bus-simple"></i>
@@ -614,7 +607,6 @@
             </div>
         </div>
 
-        <!-- ================= SCREEN 2: SIGN UP ================= -->
         <div id="signupScreen" class="screen auth-screen hidden">
             <div class="brand-logo">
                 <i class="fa-solid fa-user-plus"></i>
@@ -661,17 +653,14 @@
             </div>
         </div>
 
-        <!-- ================= SCREEN 3: MAIN APPLICATION ================= -->
         <div id="mainAppScreen" class="screen hidden">
             <div class="app-header">
                 <h3 id="appHeaderTitle">Home</h3>
             </div>
 
             <div class="app-content" id="appContent">
-                <!-- Content injected via JS -->
-            </div>
+                </div>
 
-            <!-- Horizontal Bottom Navigation -->
             <div class="bottom-nav">
                 <div class="nav-item active" onclick="switchTab('home', this)">
                     <i class="fa-solid fa-comments"></i>
@@ -694,7 +683,6 @@
 
     </div>
 
-    <!-- ================= JAVASCRIPT ================= -->
     <script>
         let isLoggedIn = false;
         let currentUserEmail = ""; 
@@ -704,7 +692,7 @@
             localStorage.setItem('usersDB', JSON.stringify({}));
         }
         if (!localStorage.getItem('globalChatDB')) {
-            localStorage.setItem('globalChatDB', JSON.stringify([])); // Empty default (no mock examples)
+            localStorage.setItem('globalChatDB', JSON.stringify([])); 
         }
 
         function getUsersDB() { return JSON.parse(localStorage.getItem('usersDB')); }
@@ -773,7 +761,6 @@
             const pass = document.getElementById('loginPassword').value;
 
             const db = getUsersDB();
-            // Critical Validation: Must be signed up first!
             if (!db[email] || db[email].password !== pass) {
                 showToast("ඇතුලත් කල දත්ත වැරදියි හෝ ඔබ තවම Sign Up වී නැත! (Please Sign Up first)");
                 return;
@@ -901,7 +888,6 @@
             const micBtn = document.getElementById('micBtn');
             if (!isRecording) {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    // Simulation if browser permission is blocked or unsupported
                     startVoiceSimulation();
                     return;
                 }
@@ -918,7 +904,7 @@
                     mediaRecorder.start();
                     isRecording = true;
                     micBtn.classList.add('recording');
-                    showToast("Recording Voice... / රෙකෝඩ් වෙමින් පවතී...");
+                    showToast("Recording Voice... / ਰෙකෝඩ් වෙමින් පවතී...");
                 }).catch(() => startVoiceSimulation());
             } else {
                 if(mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -937,7 +923,6 @@
             showToast("Voice Simulation Active (රෙකෝඩ් වෙමින් පවතී)...");
         }
         function stopVoiceSimulation() {
-            // Simulated fallback audio
             sendVoiceMessage("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
         }
 
@@ -1046,7 +1031,7 @@
             let chatList = getChatDB();
             chatList = chatList.filter(m => m.id !== id);
             saveChatDB(chatList);
-            showToast("පණිවිඩය මකා දමන ලදී (Message Deleted)");
+            showToast("පණිවිඩය මකා දමන ลදී (Message Deleted)");
             renderChatMessages();
         }
 
@@ -1177,4 +1162,3 @@
     </script>
 </body>
 </html>
-
